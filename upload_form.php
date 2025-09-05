@@ -1,15 +1,13 @@
 <?php
+// upload_form.php - Φόρμα ανάρτησης αξιολογικής έκθεσης
 
 if (session_status() === PHP_SESSION_NONE) {
     include 'session.php';
 }
-
 include 'db_conn.php';
-
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
-
 $csrf_token = $_SESSION['csrf_token'];
 
 $username = $_SESSION['username'] ?? null;
@@ -27,13 +25,11 @@ $allDieythinseis = [];
 $isAdmin = ($userRole === 'admin');
 
 if ($isAdmin) {
-    // Διαχειριστής: Λήψη όλων των διευθύνσεων
     $query = "SELECT * FROM dieythinseis ORDER BY type, name";
     $stmt = $conn->prepare($query);
     $stmt->execute();
     $allDieythinseis = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } else {
-    // Απλός χρήστης: Λήψη της ανατεθειμένης διεύθυνσης
     $query = "
         SELECT d.* FROM dieythinseis d
         JOIN users u ON u.dieythinsi_ekp_key = d.id
@@ -44,10 +40,7 @@ if ($isAdmin) {
     $dieythinsi = $stmt->fetch(PDO::FETCH_ASSOC);
 }
 
-// Λήψη τρέχουσας σελίδας για επισήμανση στο μενού
 $current_page = basename($_SERVER['PHP_SELF']);
-
-// Ορισμός ελάχιστης ημερομηνίας στην τρέχουσα ημέρα
 $min_date = date('Y-m-d');
 ?>
 <!DOCTYPE html>
@@ -55,12 +48,11 @@ $min_date = date('Y-m-d');
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ανάρτηση Έκθεσης Αξιολόγησης </title>
+    <title>Ανάρτηση Έκθεσης Αξιολόγησης</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
     <style>
-        /* Βελτιωμένη ανταπόκριση για κινητά */
         :root {
             --primary-color: #0d6efd;
             --success-color: #198754;
@@ -88,7 +80,7 @@ $min_date = date('Y-m-d');
 
         .form-control, .form-control-plaintext {
             border-radius: var(--border-radius);
-            font-size: 16px; /* Αποτρέπει το ζουμ σε iOS */
+            font-size: 16px;
             transition: all 0.3s ease;
         }
 
@@ -107,7 +99,6 @@ $min_date = date('Y-m-d');
             transform: translateY(-1px);
         }
 
-        /* Στυλ για το πεδίο αρχείου */
         .file-input-wrapper {
             position: relative;
             overflow: hidden;
@@ -142,7 +133,6 @@ $min_date = date('Y-m-d');
             color: var(--success-color);
         }
 
-        /* Κατάσταση φόρτωσης */
         .upload-spinner {
             background: rgba(255, 255, 255, 0.95);
             position: fixed;
@@ -164,13 +154,11 @@ $min_date = date('Y-m-d');
             box-shadow: var(--shadow);
         }
 
-        /* Γραμμή προόδου */
         .progress-wrapper {
             display: none;
             margin-top: 1rem;
         }
 
-        /* Στυλ σφαλμάτων */
         .is-invalid {
             border-color: var(--danger-color);
         }
@@ -179,7 +167,6 @@ $min_date = date('Y-m-d');
             display: block;
         }
 
-        /* Ανταπόκριση για κινητά */
         @media (max-width: 768px) {
             .container {
                 padding-left: 10px !important;
@@ -223,7 +210,6 @@ $min_date = date('Y-m-d');
             }
         }
 
-        /* Βελτιωμένο στυλ επικύρωσης */
         .form-group {
             position: relative;
         }
@@ -236,19 +222,16 @@ $min_date = date('Y-m-d');
             z-index: 10;
         }
 
-        /* Απόκρυψη μηνυμάτων επικύρωσης αρχικά */
         .invalid-feedback {
             display: none !important;
         }
 
-        /* Εμφάνιση μηνυμάτων επικύρωσης μόνο όταν το πεδίο είναι άκυρο */
         .is-invalid + .invalid-feedback,
         .form-control.is-invalid ~ .invalid-feedback,
         .file-input-wrapper .is-invalid ~ .invalid-feedback {
             display: block !important;
         }
 
-        /* Βελτιώσεις προσβασιμότητας */
         .sr-only {
             position: absolute;
             width: 1px;
@@ -311,9 +294,9 @@ $min_date = date('Y-m-d');
 
                         <form action="upload.php" method="POST" enctype="multipart/form-data" id="upload-form" novalidate>
 
-                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
+                             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token) ?>">
 
-                            <div class="mb-3">
+                                <div class="mb-3">
                                 <label for="administration" class="form-label">
                                     <i class="fas fa-building me-1"></i>
                                     Διεύθυνση Εκπαίδευσης
@@ -343,4 +326,439 @@ $min_date = date('Y-m-d');
                                 <?php elseif ($dieythinsi && $dieythinsi['id']): ?>
                                     <input type="hidden" name="dieythinsi_ekp_key" value="<?= htmlspecialchars($dieythinsi['id']) ?>">
                                     <div class="form-control-plaintext bg-light p-3 rounded border">
-                                        ...
+                                        <i class="fas fa-check-circle text-success me-2"></i>
+                                        <?= htmlspecialchars($dieythinsi['type']) . ' ' . htmlspecialchars($dieythinsi['name']) ?>
+                                    </div>
+                                <?php else: ?>
+                                    <div class="alert alert-warning">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        Δεν σας έχει ανατεθεί κάποια Διεύθυνση Εκπαίδευσης. Παρακαλώ επικοινωνήστε με τον διαχειριστή.
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="name" class="form-label">
+                                    <i class="fas fa-user me-1"></i>
+                                    Ανάρτηση από:
+                                </label>
+                                <div class="form-control-plaintext bg-light p-3 rounded border">
+                                    <i class="fas fa-user-circle text-primary me-2"></i>
+                                    <?= htmlspecialchars($_SESSION['cn']) ?>
+                                </div>
+                                <input type="hidden" name="upload_from" value="<?= htmlspecialchars($_SESSION['username']) ?>">
+                            </div>
+
+
+                            <div class="mb-3 form-group">
+                                <label for="ekpaideytikos" class="form-label">
+                                    <i class="fas fa-user-tie me-1"></i>
+                                    Ονοματεπώνυμο Εκπαιδευτικού <span class="text-danger">*</span>
+                                </label>
+                                <input type="text"
+                                       class="form-control"
+                                       name="ekpaideytikos"
+                                       id="ekpaideytikos"
+                                       required
+                                       placeholder="Π.χ. Νικόλαος Ιωάννου"
+                                       aria-describedby="ekpaideytikos-help">
+                                <div id="ekpaideytikos-help" class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Εισάγετε το πλήρες ονοματεπώνυμο του εκπαιδευτικού
+                                </div>
+                                <div class="invalid-feedback">
+                                    Παρακαλώ εισάγετε το ονοματεπώνυμο του εκπαιδευτικού
+                                </div>
+                            </div>
+
+                            <div class="mb-3 form-group">
+                                <label for="sxoleio" class="form-label">
+                                    <i class="fas fa-school me-1"></i>
+                                    Σχολική Μονάδα <span class="text-danger">*</span>
+                                </label>
+                                <input type="text"
+                                       class="form-control"
+                                       name="sxoleio"
+                                       id="sxoleio"
+                                       required
+                                       placeholder="Π.χ. Γυμνάσιο Ιερισσού"
+                                       aria-describedby="sxoleio-help">
+                                <div id="sxoleio-help" class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Εισάγετε την σχολική μονάδα του εκπαιδευτικού
+                                </div>
+                                <div class="invalid-feedback">
+                                    Παρακαλώ εισάγετε την σχολική μονάδα του εκπαιδευτικού
+                                </div>
+                            </div>
+
+                            <div class="mb-3 form-group">
+                                <label for="eidikotita" class="form-label">
+                                    <i class="fas fa-chalkboard-teacher me-1"></i>
+                                    Ειδικότητα <span class="text-danger">*</span>
+                                </label>
+                                <input type="text"
+                                       class="form-control"
+                                       name="eidikotita"
+                                       id="eidikotita"
+                                       required
+                                       placeholder="Π.χ. ΠΕ86 κλπ."
+                                       aria-describedby="eidikotita-help">
+                                <div id="eidikotita-help" class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Εισάγετε την ειδικότητα του εκπαιδευτικού
+                                </div>
+                                <div class="invalid-feedback">
+                                    Παρακαλώ εισάγετε την ειδικότητα του εκπαιδευτικού
+                                </div>
+                            </div>
+
+
+                            <div class="mb-3 form-group">
+    <label class="form-label">
+        <i class="fas fa-list-alt me-1"></i>
+        Επιλέξτε Πεδίο Αξιολόγησης <span class="text-danger">*</span>
+    </label>
+    <div>
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="pedio_ax" id="pedio_a1" value="A1" required>
+            <label class="form-check-label" for="pedio_a">A1</label>
+        </div>
+		<div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="pedio_ax" id="pedio_a2" value="A2" required>
+            <label class="form-check-label" for="pedio_a">A2</label>
+        </div>
+
+        <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="pedio_ax" id="pedio_b" value="B">
+            <label class="form-check-label" for="pedio_b">B</label>
+        </div>
+    </div>
+    <div class="invalid-feedback">
+        Παρακαλώ επιλέξτε μια τιμή (A1 ή Α2 ή B)
+    </div>
+</div>
+
+                            <div class="mb-3 form-group">
+                                <label for="uploaded_file" class="form-label">
+                                    <i class="fas fa-file-pdf me-1"></i>
+                                    Αρχείο Έκθεσης <span class="text-danger">*</span>
+                                </label>
+                                <div class="file-input-wrapper">
+                                    <input class="form-control"
+                                           type="file"
+                                           name="uploaded_file"
+                                           id="uploaded_file"
+                                           accept="application/pdf,.pdf"
+                                           required
+                                           aria-describedby="file-help">
+                                    <label for="uploaded_file" class="file-input-label" id="file-label">
+                                        <i class="fas fa-cloud-upload-alt me-2"></i>
+                                        Κάντε κλικ για επιλογή αρχείου PDF
+                                    </label>
+                                </div>
+                                <div id="file-help" class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Μόνο αρχεία PDF επιτρέπονται (μέγιστο μέγεθος: 10MB)
+                                </div>
+                                <div class="invalid-feedback">
+                                    Παρακαλώ επιλέξτε ένα έγκυρο αρχείο PDF
+                                </div>
+                            </div>
+
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="is_final_checkbox">
+                                <label class="form-check-label" for="is_final_checkbox">
+                                    <i class="fas fa-lock me-1"></i>
+                                    Οριστικοποίηση ανάρτησης (Δεν επιτρέπονται αλλαγές)
+                                </label>
+                            </div>
+
+                            <input type="hidden" name="is_final" id="is_final_hidden" value="0">
+
+                            <div class="d-grid">
+                                <button type="submit"
+                                        class="btn btn-primary btn-lg"
+                                        id="submit-btn"
+                                         <?php if (!$isAdmin && !($dieythinsi && $dieythinsi['id'])) echo 'disabled'; ?>>
+                                    <i class="fas fa-upload me-2"></i>
+                                    Ανάρτηση Έκθεσης Αξιολόγησης
+                                </button>
+                            </div>
+
+                            <div class="text-center mt-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Τα πεδία με <span class="text-danger">*</span> είναι υποχρεωτικά
+                                </small>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('upload-form');
+            const spinner = document.getElementById('upload-spinner');
+            const submitBtn = document.getElementById('submit-btn');
+            const fileInput = document.getElementById('uploaded_file');
+            const fileLabel = document.getElementById('file-label');
+            const progressBar = document.getElementById('upload-progress');
+            const progressWrapper = document.querySelector('.progress-wrapper');
+            let formSubmitted = false;
+
+            const inputs = form.querySelectorAll('input[required], select[required]');
+            const radioButtons = form.querySelectorAll('input[name="pedio_ax"]');
+
+            fileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    if (file.type !== 'application/pdf') {
+                        showValidationError(fileInput, 'Μόνο αρχεία PDF επιτρέπονται');
+                        fileInput.value = '';
+                        return;
+                    }
+
+                    if (file.size > 10 * 1024 * 1024) {
+                        showValidationError(fileInput, 'Το αρχείο είναι πολύ μεγάλο (μέγιστο 10MB)');
+                        fileInput.value = '';
+                        return;
+                    }
+
+                    fileLabel.innerHTML = `<i class="fas fa-file-pdf me-2 text-success"></i>${file.name}`;
+                    fileLabel.classList.add('has-file');
+                    clearValidationError(fileInput);
+                } else {
+                    fileLabel.innerHTML = '<i class="fas fa-cloud-upload-alt me-2"></i>Κάντε κλικ για επιλογή αρχείου PDF';
+                    fileLabel.classList.remove('has-file');
+                }
+            });
+
+            function resetFileLabel() {
+                fileLabel.innerHTML = '<i class="fas fa-cloud-upload-alt me-2"></i>Κάντε κλικ για επιλογή αρχείου PDF';
+                fileLabel.classList.remove('has-file');
+            }
+
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                formSubmitted = true;
+
+                if (validateForm()) {
+                    submitForm();
+                }
+            });
+
+            inputs.forEach(input => {
+                input.addEventListener('blur', function() {
+                    if (formSubmitted) {
+                        validateField(this);
+                    }
+                });
+
+                radioButtons.forEach(radio => {
+                    radio.addEventListener('change', function() {
+                        if (formSubmitted) {
+                            validateField(this);
+                        }
+                    });
+                });
+
+                input.addEventListener('input', function() {
+                    if (this.classList.contains('is-invalid')) {
+                        validateField(this);
+                    }
+                });
+            });
+
+            function validateForm() {
+                let isValid = true;
+
+                inputs.forEach(input => {
+                    if (!validateField(input)) {
+                        isValid = false;
+                    }
+                });
+
+                const radioGroup = document.querySelectorAll('input[name="pedio_ax"]');
+                if (radioGroup.length > 0) {
+                    if (!validateField(radioGroup[0])) {
+                        isValid = false;
+                    }
+                }
+
+                return isValid;
+            }
+
+            function validateField(field) {
+                const value = field.value.trim();
+                let isValid = true;
+                let message = '';
+
+                if (field.hasAttribute('required') && !value && field.type !== 'radio' && field.type !== 'file') {
+                    isValid = false;
+                    message = 'Αυτό το πεδίο είναι υποχρεωτικό';
+                }
+
+                if (field.name === 'pedio_ax') {
+                    const radioGroup = document.querySelectorAll('input[name="pedio_ax"]');
+                    const isAnySelected = Array.from(radioGroup).some(radio => radio.checked);
+
+                    if (!isAnySelected) {
+                        isValid = false;
+                        message = 'Παρακαλώ επιλέξτε μια τιμή (A1, A2 ή B)';
+
+                        const radioContainer = field.closest('.form-group');
+                        if (radioContainer) {
+                            let feedback = radioContainer.querySelector('.invalid-feedback');
+                            if (!feedback) {
+                                feedback = document.createElement('div');
+                                feedback.className = 'invalid-feedback';
+                                radioContainer.appendChild(feedback);
+                            }
+                            feedback.textContent = message;
+                            feedback.style.setProperty('display', 'block', 'important');
+                            feedback.style.setProperty('color', '#dc3545', 'important');
+                            feedback.style.setProperty('font-size', '0.875em', 'important');
+                            feedback.style.setProperty('margin-top', '0.25rem', 'important');
+                        }
+
+                        radioGroup.forEach(radio => radio.classList.add('is-invalid'));
+
+                        return false;
+                    } else {
+                        const radioContainer = field.closest('.form-group');
+                        if (radioContainer) {
+                            const feedback = radioContainer.querySelector('.invalid-feedback');
+                            if (feedback) {
+                                feedback.style.display = 'none';
+                            }
+                        }
+                        radioGroup.forEach(radio => radio.classList.remove('is-invalid'));
+                        return true;
+                    }
+                }
+
+                if (field.type === 'file') {
+                    if (field.hasAttribute('required') && field.files.length === 0) {
+                        isValid = false;
+                        message = 'Παρακαλώ επιλέξτε ένα αρχείο PDF';
+
+                        let feedback = field.closest('.form-group').querySelector('.invalid-feedback');
+                        if (!feedback) {
+                            feedback = document.createElement('div');
+                            feedback.className = 'invalid-feedback';
+                            field.closest('.form-group').appendChild(feedback);
+                        }
+                        feedback.textContent = message;
+                        feedback.style.setProperty('display', 'block', 'important');
+                        field.classList.add('is-invalid');
+                        return false;
+                    } else {
+                        let feedback = field.closest('.form-group').querySelector('.invalid-feedback');
+                        if (feedback) {
+                            feedback.style.display = 'none';
+                        }
+                        field.classList.remove('is-invalid');
+                        return true;
+                    }
+                }
+
+                if (isValid) {
+                    clearValidationError(field);
+                } else {
+                    showValidationError(field, message);
+                }
+
+                return isValid;
+            }
+
+
+            function showValidationError(field, message) {
+                if (field.type === 'file') {
+                    const label = field.closest('.file-input-wrapper').querySelector('.file-input-label');
+                    if (label) {
+                        label.classList.add('is-invalid');
+                        const feedback = field.closest('.form-group').querySelector('.invalid-feedback');
+                        if (feedback) {
+                            feedback.textContent = message;
+                            feedback.style.display = 'block';
+                        }
+                    }
+                } else {
+                    field.classList.add('is-invalid');
+                    const feedback = field.closest('.form-group').querySelector('.invalid-feedback');
+                    if (feedback) {
+                        feedback.textContent = message;
+                        feedback.style.display = 'block';
+                    }
+                }
+            }
+
+            function clearValidationError(field) {
+                if (field.type === 'file') {
+                    const label = field.closest('.file-input-wrapper').querySelector('.file-input-label');
+                    if (label) {
+                        label.classList.remove('is-invalid');
+                    }
+                    const feedback = field.closest('.form-group').querySelector('.invalid-feedback');
+                    if (feedback) {
+                        feedback.style.display = 'none';
+                    }
+                } else if (field.name === 'pedio_ax') {
+                    const radioGroup = field.closest('.form-group').querySelectorAll('.form-check-input');
+                    radioGroup.forEach(radio => radio.classList.remove('is-invalid'));
+                    const feedback = field.closest('.form-group').querySelector('.invalid-feedback');
+                    if (feedback) {
+                        feedback.style.display = 'none';
+                    }
+                } else {
+                    field.classList.remove('is-invalid');
+                    const feedback = field.parentNode.querySelector('.invalid-feedback');
+                    if (feedback) {
+                        feedback.style.display = 'none';
+                    }
+                }
+            }
+
+            function submitForm() {
+                spinner.style.display = 'flex';
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Ανάρτηση σε εξέλιξη...';
+
+                let progress = 0;
+                progressWrapper.style.display = 'block';
+
+                const progressInterval = setInterval(() => {
+                    progress += Math.random() * 10;
+                    if (progress > 90) progress = 90;
+                    progressBar.style.width = progress + '%';
+                }, 200);
+
+                const formData = new FormData(form);
+
+                setTimeout(() => {
+                    clearInterval(progressInterval);
+                    progressBar.style.width = '100%';
+                    form.submit();
+                }, 1000);
+            }
+
+            window.addEventListener('beforeunload', function() {
+                if (submitBtn.disabled) {
+                    return 'Η ανάρτηση είναι σε εξέλιξη. Είστε σίγουροι ότι θέλετε να φύγετε;';
+                }
+            });
+
+            const isFinalCheckbox = document.getElementById('is_final_checkbox');
+            const isFinalHidden = document.getElementById('is_final_hidden');
+            isFinalCheckbox.addEventListener('change', function() {
+                isFinalHidden.value = this.checked ? '1' : '0';
+            });
+        });
+    </script>
+</body>
+</html>
