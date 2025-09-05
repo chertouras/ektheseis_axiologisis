@@ -48,7 +48,7 @@ if (!isset($_SESSION['username']) || !isset($_SESSION['role'])) {
     exit;
 }
 
-// Έλεγχος δακτυλικού αποτυπώματος περιηγητή
+// Έλεγχος αποτυπώματος περιηγητή
 $current_fingerprint = hash('sha256', $_SERVER['HTTP_USER_AGENT']);
 if (!isset($_SESSION['fingerprint']) || $_SESSION['fingerprint'] !== $current_fingerprint) {
     session_unset();
@@ -71,4 +71,5 @@ if (isset($_SESSION['username']) && isset($_SESSION['role'])) {
         header("Location: phpcas.php");
         exit;
     }
+
 }
